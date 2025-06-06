@@ -64,7 +64,7 @@ class TrajectoryStopDetector:
         is_stopped = False
         previously_stopped = False
 
-        for index, data in traj.df[traj.get_geom_column_name()].iteritems():
+        for index, data in traj.df[traj.get_geom_column_name()].items():
             segment_geoms.append(data)
             geom = geom.union(data)
             segment_times.append(index)
@@ -182,6 +182,7 @@ class TrajectoryStopDetector:
             stop_pts["duration_s"] = (
                 stop_pts["end_time"] - stop_pts["start_time"]
             ).dt.total_seconds()
-            stop_pts["traj_id"] = stop_pts["traj_id"].astype(type(stop.parent.id))
+            if not isinstance(stop.parent.id, tuple) : 
+                stop_pts["traj_id"] = stop_pts["traj_id"].astype(type(stop.parent.id))
 
         return stop_pts

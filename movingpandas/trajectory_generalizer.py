@@ -209,11 +209,11 @@ class DouglasPeuckerGeneralizer(TrajectoryGeneralizer):
     def _generalize_traj(self, traj, tolerance):
         if compact.USE_PYMEOS:
             pymeos_seq = traj._create_pymeos_seq()
-            simplified_seq = pymeos_seq.simplify(synchronized=False, tolerance=tolerance)
-            simplified_coords = [value.coords[0] for value in simplified_seq.values]
+            simplified_seq = pymeos_seq.simplify_douglas_peucker(distance=tolerance, synchronized=False)
+            simplified_coords = [value.coords[0] for value in simplified_seq.values()]
         else:
             simplified_coords = (
-                traj.to_linestring().simplify(tolerance, preserve_topology=False).coords
+                traj.to_linestring().simplify_douglas_peucker(distance=tolerance).coords
             )
 
         keep_rows = []

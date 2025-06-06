@@ -13,7 +13,7 @@ from geopy.distance import geodesic
 try:
     import pymeos
     # TODO: design issue: when to initialize and finalize
-    pymeos.meos_initialize()
+    pymeos.meos_initialize("UTC")
 except ImportError:
     pymeos = None
 
@@ -162,17 +162,25 @@ class Trajectory:
             )
         return pymeos_point
 
-    def _create_pymeos_seq(self): 
-        x = list()
-        y = list()
-        for p in self.df.geometry:
-            x.append(p.x)
-            y.append(p.y)
-        times = self.df.index
+    def _create_pymeos_seq(self):     
         
-        pymeos_seq = pymeos.TPointSeq.from_arrays(times, x, y, None, \
-            self.df.crs.to_epsg(), self.is_latlon, True, True, True, False)
+        times = list(self.df.index)
+        geoms = list(self.df.geometry)
+
+        instants = []
+        if self.is_latlon:
+            for geom, t in zip(geoms, times):
+                inst = pymeos.TGeogPointInst.from_base_time(geom, t)
+                instants.append(inst)
+            pymeos_seq = pymeos.TGeogPointSeq(instant_list=instants, lower_inc=True, upper_inc=True)
+        else:
+            for geom, t in zip(geoms, times):
+                inst = pymeos.TGeomPointInst.from_base_time(geom, t)
+                instants.append(inst)
+            pymeos_seq = pymeos.TGeomPointSeq(instant_list=instants, lower_inc=True, upper_inc=True)
+
         return pymeos_seq
+        
 
     def _check_timezone_exist(self):
         ts_sample = self.df.index[0]
@@ -921,12 +929,12 @@ class Trajectory:
             )
         if compat.USE_PYMEOS:
             pymeos_seq = self._create_pymeos_seq()
-            speed_seq = pymeos_seq.speed
+            speed_seq = pymeos_seq.speed()
             tz_exist = self._check_timezone_exist()
             if tz_exist:
-                data = [(instant.value, instant.timestamp) for instant in speed_seq.instants]
+                data = [(instant.value(), instant.timestamp()) for instant in speed_seq.instants()]
             else:
-                data = [(instant.value, instant.timestamp.replace(tzinfo=None)) for instant in speed_seq.instants]
+                data = [(instant.value(), instant.timestamp().replace(tzinfo=None)) for instant in speed_seq.instants()]
             df_speed = DataFrame(data, columns=[name, 't']).set_index('t')
             # TODO: Speed calculated by PyMEOS is different from MVP implementation 
             # assert len(df_speed) == len(self.df)
