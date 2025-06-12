@@ -162,7 +162,7 @@ class Trajectory:
             )
         return pymeos_point
 
-    def _create_pymeos_seq(self):     
+    def _create_pymeos_seq(self):    
         
         times = list(self.df.index)
         geoms = list(self.df.geometry)
@@ -170,14 +170,14 @@ class Trajectory:
         instants = []
         if self.is_latlon:
             for geom, t in zip(geoms, times):
-                inst = pymeos.TGeogPointInst.from_base_time(geom, t)
+                inst = pymeos.TGeogPointInst(point=geom, timestamp=t)
                 instants.append(inst)
             pymeos_seq = pymeos.TGeogPointSeq(instant_list=instants, lower_inc=True, upper_inc=True)
         else:
             for geom, t in zip(geoms, times):
-                inst = pymeos.TGeomPointInst.from_base_time(geom, t)
+                inst = pymeos.TGeomPointInst(point=geom, timestamp=t)
                 instants.append(inst)
-            pymeos_seq = pymeos.TGeomPointSeq(instant_list=instants, lower_inc=True, upper_inc=True)
+            pymeos_seq = pymeos.TGeomPointSeq(instant_list=instants, lower_inc=True, upper_inc=True, interpolation=pymeos.TInterpolation.LINEAR)
 
         return pymeos_seq
         
