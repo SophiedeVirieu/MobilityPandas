@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.12.0] - 2025-06-03
 
-### Fixed
+### Changed
 Adapted MobilityPandas to :
 
 pymeos     : 1.2.0  
@@ -27,9 +27,10 @@ geopy      : 2.4.1
 holoviews  : 1.20.2
 hvplot     : 0.11.3
 geoviews   : 1.12.0
-stonesoup  : 1.6 -->
+stonesoup  : 1.6 
+python     : 3.9.21 -->
 
-### Changed
+### Fixed
 
 Updated internal code to answer breaking changes introduced in recent versions of upstream libraries:
 
@@ -37,13 +38,12 @@ Updated internal code to answer breaking changes introduced in recent versions o
 - Shapely 2.0.6: geometry attributes restructured
 - GeoPandas 1.0.1: deprecated `GeoDataFrame.append()` removed
 - MobilityDB / PyMEOS: class attributes such as `.timestamp` have become methods.
-- Trajectory module: `from\_arrays()` became `from\_base\_temporal()`.
+- trajectory module: `from\_arrays()` suppressed. The constructor of `TGeomPointInst` class was used instead.
 - trajectory\_generalizer: `simplify()` became `simplify\_douglas\_peucker()`.
 
 ### Notes
 - Internal changes are **not backward-compatible** for custom subclassing or extensions relying on old trajectory internals.
 - No user-facing API changes.
-- Some fixes are still in progress.
 
 ---
 
