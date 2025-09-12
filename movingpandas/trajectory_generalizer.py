@@ -9,7 +9,7 @@ try:
 except ImportError:
     pymeos = None
 
-from . import _compat as compact
+from . import _compat as compat
 from .trajectory import Trajectory
 from .trajectory_collection import TrajectoryCollection
 from .geometry_utils import measure_distance_geodesic, measure_distance_euclidean
@@ -84,26 +84,44 @@ class MinDistanceGeneralizer(TrajectoryGeneralizer):
     """
 
     def _generalize_traj(self, traj, tolerance):
-        temp_df = traj.df.copy()
-        prev_pt = temp_df.iloc[0][traj.get_geom_column_name()]
-        keep_rows = [0]
+    
         i = 0
+    
+        if compat.USE_PYMEOS:
+            pymeos_seq = traj._create_pymeos_seq()
+            simplified_seq = pymeos.mixins.simplify.TSimplifiable.simplify_min_distance(pymeos_seq, distance=tolerance)
+            simplified_coords = [value.coords[0] for value in simplified_seq.values()]
+            
+            keep_rows = []
 
-        for index, row in temp_df.iterrows():
-            pt = row[traj.get_geom_column_name()]
-            if traj.is_latlon:
-                dist = measure_distance_geodesic(pt, prev_pt)
-            else:
-                dist = measure_distance_euclidean(pt, prev_pt)
-            if dist >= tolerance:
-                keep_rows.append(i)
-                prev_pt = pt
-            i += 1
+            for index, row in traj.df.iterrows():
+                current_pt = row[traj.get_geom_column_name()]
+                if current_pt.coords[0] in simplified_coords:
+                    keep_rows.append(i)
+                i += 1
 
-        keep_rows.append(len(traj.df) - 1)
-        new_df = traj.df.iloc[keep_rows]
-        new_traj = Trajectory(new_df, traj.id)
-        return new_traj
+            generalized = traj.df.iloc[keep_rows]
+            
+        else:
+            temp_df = traj.df.copy()
+            prev_pt = temp_df.iloc[0][traj.get_geom_column_name()]
+            keep_rows = [0]
+
+            for index, row in temp_df.iterrows():
+                pt = row[traj.get_geom_column_name()]
+                if traj.is_latlon:
+                    dist = measure_distance_geodesic(pt, prev_pt)
+                else:
+                    dist = measure_distance_euclidean(pt, prev_pt)
+                if dist >= tolerance:
+                    keep_rows.append(i)
+                    prev_pt = pt
+                i += 1
+
+            keep_rows.append(len(traj.df) - 1)
+            generalized = traj.df.iloc[keep_rows]
+
+        return Trajectory(generalized, traj.id)
 
 
 class MinTimeDeltaGeneralizer(TrajectoryGeneralizer):
@@ -123,24 +141,43 @@ class MinTimeDeltaGeneralizer(TrajectoryGeneralizer):
     """
 
     def _generalize_traj(self, traj, tolerance):
-        temp_df = traj.df.copy()
-        temp_df["t"] = temp_df.index
-        prev_t = temp_df.head(1)["t"][0]
-        keep_rows = [0]
+        
         i = 0
+        
+        if compat.USE_PYMEOS:
+            pymeos_seq = traj._create_pymeos_seq()
+            simplified_seq = pymeos.mixins.simplify.TSimplifiable.simplify_min_tdelta(pymeos_seq, distance=tolerance)
+            simplified_coords = [value.coords[0] for value in simplified_seq.values()]
+            
+            keep_rows = []
 
-        for index, row in temp_df.iterrows():
-            t = row["t"]
-            tdiff = t - prev_t
-            if tdiff >= tolerance:
-                keep_rows.append(i)
-                prev_t = t
-            i += 1
+            for index, row in traj.df.iterrows():
+                current_pt = row[traj.get_geom_column_name()]
+                if current_pt.coords[0] in simplified_coords:
+                    keep_rows.append(i)
+                i += 1
 
-        keep_rows.append(len(traj.df) - 1)
-        new_df = traj.df.iloc[keep_rows]
-        new_traj = Trajectory(new_df, traj.id)
-        return new_traj
+            generalized = traj.df.iloc[keep_rows]
+            
+        else:
+            
+            temp_df = traj.df.copy()
+            temp_df["t"] = temp_df.index
+            prev_t = temp_df.head(1)["t"][0]
+            keep_rows = [0]
+            
+            for index, row in temp_df.iterrows():
+                t = row["t"]
+                tdiff = t - prev_t
+                if tdiff >= tolerance:
+                    keep_rows.append(i)
+                    prev_t = t
+                i += 1
+
+            keep_rows.append(len(traj.df) - 1)
+            generalized = traj.df.iloc[keep_rows]
+            
+        return Trajectory(generalized, traj.id)
 
 
 class MaxDistanceGeneralizer(TrajectoryGeneralizer):
@@ -207,7 +244,7 @@ class DouglasPeuckerGeneralizer(TrajectoryGeneralizer):
     """
 
     def _generalize_traj(self, traj, tolerance):
-        if compact.USE_PYMEOS:
+        if compat.USE_PYMEOS:
             pymeos_seq = traj._create_pymeos_seq()
             simplified_seq = pymeos_seq.simplify_douglas_peucker(distance=tolerance, synchronized=False)
             simplified_coords = [value.coords[0] for value in simplified_seq.values()]
@@ -257,7 +294,26 @@ class TopDownTimeRatioGeneralizer(TrajectoryGeneralizer):
     """
 
     def _generalize_traj(self, traj, tolerance):
-        generalized = self.td_tr(traj.df.copy(), tolerance)
+    
+        if compat.USE_PYMEOS:
+            pymeos_seq = traj._create_pymeos_seq()
+            simplified_seq = pymeos_seq.simplify_douglas_peucker(distance=tolerance, synchronized=True)
+            simplified_coords = [value.coords[0] for value in simplified_seq.values()]
+            
+            keep_rows = []
+            i = 0
+
+            for index, row in traj.df.iterrows():
+                current_pt = row[traj.get_geom_column_name()]
+                if current_pt.coords[0] in simplified_coords:
+                    keep_rows.append(i)
+                i += 1
+
+            generalized = traj.df.iloc[keep_rows]
+
+        else:
+            generalized = self.td_tr(traj.df.copy(), tolerance)
+        
         return Trajectory(generalized, traj.id)
 
     def td_tr(self, df, tolerance):

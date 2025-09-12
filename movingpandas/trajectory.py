@@ -163,25 +163,30 @@ class Trajectory:
         return pymeos_point
 
     def _create_pymeos_seq(self):    
-        
-        times = list(self.df.index)
-        geoms = list(self.df.geometry)
 
-        instants = []
         if self.is_latlon:
-            for geom, t in zip(geoms, times):
-                inst = pymeos.TGeogPointInst(point=geom, timestamp=t)
-                instants.append(inst)
-            pymeos_seq = pymeos.TGeogPointSeq(instant_list=instants, lower_inc=True, upper_inc=True)
+            tr = pymeos.TGeogPointSeq.from_arrays(
+                    t = self.df.index.strftime('%Y-%m-%d %H:%M:%S').values,
+                    x = self.df.geometry.x.values, 
+                    y = self.df.geometry.y.values,
+                    lower_inc=True,
+                    upper_inc=True
+                )
+            pymeos_seq = pymeos.TGeogPointSeq.from_instants(instant_list=tr.instants(), lower_inc=True, upper_inc=True)
+
         else:
-            for geom, t in zip(geoms, times):
-                inst = pymeos.TGeomPointInst(point=geom, timestamp=t)
-                instants.append(inst)
-            pymeos_seq = pymeos.TGeomPointSeq(instant_list=instants, lower_inc=True, upper_inc=True, interpolation=pymeos.TInterpolation.LINEAR)
+            tr = pymeos.TGeomPointSeq.from_arrays(
+                    t = self.df.index.strftime('%Y-%m-%d %H:%M:%S').values,
+                    x = self.df.geometry.x.values, 
+                    y = self.df.geometry.y.values,
+                    lower_inc=True,
+                    upper_inc=True
+                )
 
-        return pymeos_seq
+            pymeos_seq = pymeos.TGeomPointSeq.from_instants(instant_list=tr.instants(), lower_inc=True, upper_inc=True, interpolation=pymeos.TInterpolation.LINEAR)      
+
+        return pymeos_seq 
         
-
     def _check_timezone_exist(self):
         ts_sample = self.df.index[0]
         return ts_sample.tzinfo is not None and ts_sample.tzinfo.utcoffset(ts_sample) is not None
@@ -1061,6 +1066,12 @@ class Trajectory:
                 f"the trajectory coordinate system is {self.crs}."
             )
             warnings.warn(message, UserWarning)
+            
+        if compat.USE_PYMEOS:
+            pymeos_seq = self._create_pymeos_seq()
+            pymeos_seq2 = other._create_pymeos_seq()
+            return pymeos_seq.hausdorff_distance(pymeos_seq2)
+        
         if type(other) == Trajectory:
             other = other.to_linestring()
         return self.to_linestring().hausdorff_distance(other)

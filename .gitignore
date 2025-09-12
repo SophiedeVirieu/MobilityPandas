@@ -115,6 +115,8 @@ venv.bak/
 tutorials/demodata_geolife.gpkg
 tutorials/Blogpost.ipynb
 tutorials/temp.gpkg
+benchmark/data/
+benchmark/test*
 
 blogpost.md
 movingpandas/tests/temp.gpkg

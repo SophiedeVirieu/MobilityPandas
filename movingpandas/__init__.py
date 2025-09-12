@@ -2,7 +2,6 @@
 `movingpandas`: Implementation of Trajectory classes and functions built on top
 of GeoPandas
 """
-
 from .trajectory import Trajectory  # noqa F401
 from .trajectory_generalizer import (  # noqa F401
     TrajectoryGeneralizer,

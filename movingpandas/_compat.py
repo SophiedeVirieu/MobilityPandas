@@ -13,7 +13,7 @@ try:
 except ImportError:
     HAS_PYMEOS = False
 
-
+print("HAS_PYMEOS = ", HAS_PYMEOS)
 
 def set_use_pymeos(val=None):
     """
