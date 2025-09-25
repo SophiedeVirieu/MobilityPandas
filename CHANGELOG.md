@@ -38,8 +38,8 @@ Updated internal code to answer breaking changes introduced in recent versions o
 - Shapely 2.0.6: geometry attributes restructured
 - GeoPandas 1.0.1: deprecated `GeoDataFrame.append()` removed
 - MobilityDB / PyMEOS: class attributes such as `.timestamp` have become methods.
-- trajectory module: `from\_arrays()` suppressed. The constructor of `TGeomPointInst` class was used instead.
-- trajectory\_generalizer: `simplify()` became `simplify\_douglas\_peucker()`.
+- trajectory module: `from_arrays()` suppressed. The constructor of `TGeomPointInst` class was used instead.
+- trajectory\_generalizer: `simplify()` became `simplify_douglas_peucker()`.
 
 ### Notes
 - Internal changes are **not backward-compatible** for custom subclassing or extensions relying on old trajectory internals.
