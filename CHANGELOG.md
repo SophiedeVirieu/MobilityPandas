@@ -34,9 +34,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
--A benchmark of the new trajectory constructor
--Functions Douglas-Peucker with time consideration, minimum distance, minimum time delta and hausdorff distance
--A benchmark of MobilityPandas versus MovingPandas
+-A benchmark of the new trajectory constructor  
+-Functions Douglas-Peucker with time consideration, minimum distance, minimum time delta and hausdorff distance  
+-A benchmark of MobilityPandas versus MovingPandas  
 
 ### Fixed
 
