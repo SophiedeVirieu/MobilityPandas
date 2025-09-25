@@ -10,7 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.12.0] - 2025-06-03
 
 ### Changed
--Adapted MobilityPandas to :
+- Adapted MobilityPandas to :
 
   pymeos     : 1.2.0  
   geopandas  : 1.0.1  
@@ -30,13 +30,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   stonesoup  : 1.6 
   python     : 3.9.21 -->
 
--The trajectory constructor was optimized
+- The trajectory constructor was optimized
 
 ### Added
 
--A benchmark of the new trajectory constructor  
--Functions Douglas-Peucker with time consideration, minimum distance, minimum time delta and hausdorff distance  
--A benchmark of MobilityPandas versus MovingPandas  
+- A benchmark of the new trajectory constructor  
+- Functions Douglas-Peucker with time consideration, minimum distance, minimum time delta and hausdorff distance  
+- A benchmark of MobilityPandas versus MovingPandas  
 
 ### Fixed
 
