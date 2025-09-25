@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [0.12.0] - 2025-06-03
+## [0.12.0] - 2025-09-05
 
 ### Changed
 - Adapted MobilityPandas to :
